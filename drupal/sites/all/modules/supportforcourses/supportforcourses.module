@@ -1,0 +1,7 @@
+<?php
+/**
+ * @file
+ * Code for the supportForCourses feature.
+ */
+
+include_once 'supportforcourses.features.inc';

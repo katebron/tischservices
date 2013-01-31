@@ -1,0 +1,7 @@
+<?php
+/**
+ * @file
+ * Code for the LibGuide feature.
+ */
+
+include_once 'libguide.features.inc';
