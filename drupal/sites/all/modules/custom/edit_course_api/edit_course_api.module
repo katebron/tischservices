@@ -1,59 +1,63 @@
 <?php
-/**
-* Implements hook_views_query_alter()
-*/
-function edit_course_api_views_query_alter(&$view, &$query) {
-    //assuming a view with an exposed filter on node title
-    //view must have 3 title fields & 2 filter groups - 1 in first, 2 in secnd
-    if ($view->name == 'clone_2_of_support_for_course'||$view->name == 'support_for_course') {
-        
-      $str = $view->exposed_raw_input['title'];
-        
-      //wildcard - return all research guides
-      if ($str == '*' || $str == '') {
-            //sort title - ascending
-            $query->orderby[0] = array (
-                'field' => 'node.title',
-                'direction' => 'ASC',
-            );
-            $query->where[1]['conditions'][2] = array(
-                'field' => 'node.title',
-                'value' => '%',
-                'operator' => 'LIKE',
-            );
-      }
-      else {
-        //split input by department and course number
-        preg_match('#([a-zA-Z]*)([-\d]*)#', $str, $match);
-        $alpha = $match[1];
-        $num = $match[2];
-        
-        $view->exposed_raw_input['title_1'] = $alpha;
-        $view->exposed_input['title_1'] = $alpha;
-        $view->exposed_data['title_1'] = $alpha;
-        $view->exposed_raw_input['title_2'] = $num;
-        $view->exposed_input['title_2'] = $num;
-        $view->exposed_data['title_2'] = $num;
-       
-       //sort title - descending 
-        $query->orderby[0] = array (
-           'field' => 'node.title',
-           'direction' => 'DESC',
-        );
-        //modify first title parameter to department - filter set to 'ends with'
-        $query->where[2]['conditions'][2] = array(
-            'field' => 'node.title',
-            'value' => '%' . $alpha,
-            'operator' => 'LIKE',
-        );
-      
-        //modify second title parameter to not contain course number
-        $query->where[2]['conditions'][3] = array(
-            'field' => 'node.title',
-            'value' => '%' . $num . '%',
-            'operator' => 'NOT LIKE',
-        );
-      }
-   }
-}
 
+/**
+ * Implements hook_views_query_alter()
+ */
+function edit_course_api_views_query_alter(&$view, &$query) {
+  // assuming a view with an exposed filter on node title
+  //view must have 3 title fields &2 filter groups - 1 in first, 2 in second
+  
+    //specify which view to work with
+    if ($view->name == 'support_for_view') {
+
+	    //parse parameter of global combine field
+		$str = $view->exposed_raw_input['title'];
+		
+		//wildcard - return all research guides in ascending order
+		if ($str == '*' || $str == '') {
+			$query->orderby[0] = array (
+				'field' => 'node.title',
+				'direction' => 'ASC',
+			);
+			$query->where[1]['conditions'][2] =  array(
+				'field' => 'node.title',
+				'value' => '%',
+				'operator' => 'LIKE',
+			);
+		}
+		
+		else {
+		//split input by department and course number
+			preg_match('#([a-zA-Z]*)([-\d]*)#', $str, $match);
+			$alpha =$match[1]; //the department
+			$num = $match[2];  //course number
+
+			$view->exposed_raw_input['title_1'] = $alpha;
+			$view->exposed_raw_input['title_2'] = $num;
+			$view->exposed_input['title_1'] = $alpha;
+			$view->exposed_input['title_2'] = $num;
+			$view->exposed_data['title_1'] = $alpha;
+			$view->exposed_data['title_2'] = $num;
+			
+			//sort by descending
+			$query->orderby[0] = array (
+				'field' => 'node.title',
+				'direction' => 'DESC',
+		    );
+			
+			//modify first title parameter  - ends with department
+			$query->where[2]['conditions'][2] =  array(
+				'field' => 'node.title',
+				'value' => '%' . $alpha,
+				'operator' => 'LIKE',
+			);
+			
+			//modify second title parameter to not contain course number
+			$query->where[2]['conditions'][3] =  array(
+				'field' => 'node.title',
+				'value' => '%' . $num . '%',
+				'operator' => 'NOT LIKE',
+			);
+        }
+    }
+}
